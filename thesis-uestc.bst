@@ -38,6 +38,7 @@ ENTRY
   id
   note
   language
+  howpublished
 }
 {}
 {label}
@@ -321,6 +322,11 @@ FUNCTION {format.id}
     id
 }
 
+FUNCTION {format.howpublished}
+{
+    howpublished
+}
+
 STRINGS{replace find text}
 INTEGERS{find_length}
 FUNCTION{find.replace}
@@ -422,7 +428,11 @@ FUNCTION {conference}
         format.address write$ add.comma
     } if$
     format.year write$ add.comma
-    format.pages write$
+    pages missing$
+    'skip$
+    {
+        format.pages write$
+    } if$
     newline$
 }
 
@@ -441,18 +451,30 @@ FUNCTION {article}
     bibitem.begin
     format.authors write$ add.period
     format.title "[J]" * write$ add.period
-    format.journal write$ add.comma
-    format.year write$ add.comma
-    
-    number missing$
+    journal missing$
+    'skip$
     {
-        volume ": " * write$
-    } {
-        volume "(" *
-        number *
-        "): " * write$
+    	format.journal write$ add.comma
     } if$
-    format.pages write$
+    format.year write$ add.comma
+
+    volume missing$
+    'skip$
+    {
+        number missing$
+    	{
+        		volume ": " * write$
+    	} {
+        		volume "(" *
+        		number *
+        		"): " * write$
+    	} if$
+    } if$
+    pages missing$
+    'skip$
+    {
+        format.pages write$
+    } if$
     newline$
 }
 
@@ -554,6 +576,19 @@ FUNCTION {onlynote}
     bibitem.begin
     note write$
     newline$
+}
+
+FUNCTION {misc}
+{ 
+    bibitem.begin
+    author missing$
+    'skip$
+    {
+        format.authors write$ add.period
+    } if$
+    format.title write$ add.comma
+    format.year write$ add.period
+    format.howpublished write$ add.period
 }
 
 READ
