@@ -1,5 +1,5 @@
-\chapter{构建数据集C-VQA}
-\section{常见Knowledge Base}
+\chapter{构建增强数据集：CVQA}
+\section{视觉问答数据集概述}
 从LeCun的MNIST数据集\citing{lecun1998mnist}到如今各式各样的计算机视觉等人工智能任务的数据集，优质的数据集已经成为了智能系统成长的“食粮”，尤其是神经网络复兴以来，计算机视觉和自然语言处理等任务的快速迭代蜕变一直都离不开数据的收集和整理工作\citing{deng2009imagenet,lin2014microsoft,rajpurkar2016squad}。关于数据更重要还是算法更重要的争论还继续，但数据集对于智能任务的训练价值是有目共睹的，当然，前提是数据集具有足够大的容量\citing{sun2017revisiting}、规范友好数据格式、较小的数据偏见等特点。视觉问答任务是在经历了计算机视觉和自然语言处理任务成功之后的新的颇具野心的构想——让系统能同时理解多模信息，并完成信息整合与推理。自从2014年以来，多个高质量的数据集为这个人工智能领域“新生儿”的快速成长提供了坚实的保障——DAQUAR\citing{malinowski2014multi}、COCO-QA\citing{ren2015exploring}、VQA\citing{antol2015vqa}、VQA 2.0\citing{goyal2017making}、CLEVR\citing{johnson2017clevr}、VQA-CP\citing{agrawal2018don}、KB-VQA\citing{wang2015explicit}。
 
 \textbf{DAQUAR}
@@ -145,8 +145,5 @@ FVQA和同样包含先验知识的数据集KB-VQA两者都能通过查询语言�
 
 然而两个数据集都面临着同样的问题：数据量的扩充和问题类型的扩充。两个数据集的问题收集都是通过人工的方式，并且参与者数量有限，因此直接导致了问题数量远低于其他自动化方法生成的数据集。大规模的协同工作和探索更多自动化方法是扩充数据集容量的方向。两个数据集都受到问题类型的限制，KB-VQA使用预先设定的问题模板，限制了问题的开放程度，FVQA虽然没有使用预先设定的问题模板，但其筛选的12种谓语间接的限制了问题的类型。扩展问题类型意味着额外知识库的扩充，也对视觉问答系统的问题解析提出了更高的要求，但这也能大幅的提高系统面对复杂多样的问题的开放性和鲁棒性。
 
-\section{VQA2.0}
+\section{CVQA的构建和分析}
 
-\section{数据集重构方法}
-
-\section{数据集分析}
