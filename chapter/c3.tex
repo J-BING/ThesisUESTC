@@ -4,6 +4,48 @@
 \section{基于Faster R-CNN的图像处理}
 
 \section{基于ELMo的文本处理}
+和众多自然语言处理任务一样，在视觉问答任务中如何准确理解问题内容对最终的答案准确率上有着决定性的影响。而自然语言理解中最为基本和核心的便是文本表达，文本表达将自然语言转换为计算机可处理的数字，为自动化处理文本相关的任务建立了基础。在文本表达中，独热向量（one-hot）是最早也是最为简单的词向量。但是由于其稀疏性带来的“维度灾难”和因简单的编码方式而造成的“语义鸿沟”，基于分布式假设——即处于相似上下文的词语具有相似的含义，研究者先后提出了多种使用分布式表示的词向量模型，例如，CBOW，Skip-Gram，word2vec\citing{mikolov2013distributed}，潜在语义分析（LSA）\citing{landauer1998introduction}，GloVe\citing{pennington2014glove}，ELMo\citing{Peters:2018}，BERT\citing{DBLP:journals/corr/abs-1810-04805}等。
+
+CBOW和Skip-Gram均是使用神经网络模型训练上下文信息得到词向量。word2vec也使用了CBOW与Skip-Gram来训练模型与得到词向量，但是并没有使用传统的DNN模型，而是使用霍夫曼树来代替隐藏层和输出层的神经元，提高了计算效率，因此被研究者广泛地使用作为预训练的词向量。但是由于word2vec使用滑动窗口来限定上下文信息，因此得到的词向量仅仅使用了局部的语义和语法信息。不同于word2vec使用局部语料，潜在语义分析（LSA）采用统计计数的方式获得语料的全局信息，其统计预料库中每两个词共同出现的次数构成共现矩阵，并采用了基于奇异值分解（SVD）的矩阵分解技术对大矩阵进行降维，得到词向量。然而LSA方法中的SVD计算量很大，并且共现矩阵仅能表示两个词语同时出现的次数，并不能表示词语之间的远近关系。为了改进word2vec的局部预料限制和LSA的计算复杂性，GloVe使用衰减函数改造LSA的共现矩阵，使得词语间的远近关系得以表达。GloVe还构建了词向量和共现矩阵之间的近似关系，使用梯度下降算法取代了LSA中的奇异值分解，大大减少了计算代价，并且得到了远超LSA和word2vec的性能。
+
+以上提到的所有模型都是通过对语料库的学习得到静态的词向量，即每个单词对应一个确定的实数向量，这种固定向量在处理词汇的多义性上表现不佳。无论是中文词语还是英文单词都广泛得存在一词多义的现象，即同一个词在不同的语境下含义发生变化，例如，在中文中，“他正在算账”和“下回找你算账”中的“算账”由于文化演化而产生了更复杂的引申义，又如英文中的“where is the bank?”和“It is the bank of the river”中的“bank”在第一句中译为“银行”而第二句中译为“河畔”。为解决一词多义的问题，研究者提出了动态词向量，ELMo和BERT便是其中的代表。ELMo在多个NLP任务中均提高了模型的准确率，因此本文将着重介绍并使用ELMo模型处理视觉问答任务中的文本，并在后续的处理中结合类似于BERT的注意力机制。
+
+ELMo是一种深度场景化的词表示。其模型深度能够对复杂的词语使用特性——语法和语义特征进行有效建模，而其模型的动态性能根据词语的上下文的不同生成动态向量，进而为解决一词多义提供了可能。ELMo采用了两个阶段获得词向量，第一个阶段是用大量的文本语料训练一个深度双向语言模型（biLSTM）；第二个阶段从预训练网络中提取对应单词的网络各层的内部状态（internal state），并通过函数转化为词向量。
+
+语言模型是对语句的概率分布的建模。语言模型分为前向和后向，前向是指已知上文的词语，推理下一个词语的方式，而后向则是已知后文的内容，求解上一个词语的方式。对于一个具有N个单词的句子$S=(t_1, t_2, ..., t_N)$而言，前向语言模型就是求解以下公式的最大值：
+\begin{equation}
+p(t_1, t_2, ..., t_N)=\prod_{k=1}^N p(t_k|t_1,t_2,...,t_{k-1})
+\end{equation}
+其中$p(t_1, t_2, ..., t_N)$为序列的联合概率，$p(t_k|t_1, t_2,..., t_{k-1})$表示已知$t_k$的上文$(t_1, t_2, ..., t_{k-1})$的条件下，求解$t_k$的条件概率。对应的后向语言模型的公式为
+\begin{equation}
+p(t_1, t_2, ..., t_N)=\prod_{k=1}^N p(t_k|t_{k+1},t_{k+2},...,t_N)
+\end{equation}
+
+ELMo使用双向LSTM（biLSTM）模型作为语言模型的基础。首先将“上下文无关的”初始词向量$x{_k^{LM}}$输入L层的前向LSTM。在位置k上，LSTM将输出一个“上下文相关”的词表征$\vec{h}_{k,j}^{LM,j}$，其中$j = 1, ..., L$。最后一层的LSTM输出$\vec{h}_{k,j}^{LM,L}$通过一个softmax层预测下一个词语的初始词向量$x{_{k+1}^{LM}}$。后向LSTM类似于前向LSTM有L层并且在k位置上得到一个词表征$\overleftarrow{h}_{k,j}^{LM}$。最后通过最大似然的方式训练双向LSTM模型，公式如下：
+\begin{equation}
+\sum_{k=1}^N(\log_p(t_k|t_1, t_2,..., t_{k-1};\Theta_x,\overrightarrow{\Theta_{LSTM}},\Theta_s) + \log_p(t_k|t_{k+1},t_{k+2},...,t_N;\Theta_x,\overleftarrow{\Theta_{LSTM}},\Theta_s)
+)
+\end{equation}
+
+其中，$\Theta_x$和$\Theta_s$分别是初始词向量训练时的两个softmax层参数，$\overrightarrow{\Theta_{LSTM}}$和$\overleftarrow{\Theta_{LSTM}}$则是双向语言模型的参数。
+
+当完成预训练阶段后，向网络输入一个新句子，句子中每个单词都能得到对应的三种Embedding:最底层是初始的词向量$x{_k^{LM}}$；前向LSTM输出的$\overrightarrow{h}_{k,j}^{LM}$；后向LSTM输出的$\overleftarrow{h}_{k,j}^{LM}$。ELMo将三种词向量串联，得到
+\begin{equation}
+R_k = 
+[x_k^{LM}, \overrightarrow{h}_{k,j}^{LM}, \overleftarrow{h}_{k,j}^{LM} | j = 1, ..., L]
+= [h_{k,j}^{LM} | j = 0, ..., L]
+\end{equation}
+
+其中$h_{k,0}^{LM}$是初始词向量，$h_{k,j}^{LM} = [\overrightarrow{h}_{k,j}^{LM}; \overleftarrow{h}_{k,j}^{LM}]$ 是每个biLSTM层输出的结果。
+
+最后使用以下公式得到对应单词的具有”上下文信息“的词向量。
+\begin{equation}
+ELMo_k^{task} = E(R_k; \Theta^{task}) = \gamma^{task}\sum_{j=0}^L s_j^{task} h_{k,j}^{LM}
+\end{equation}
+
+其中是$s_j^{task}$任务相关训练得到的权重参数, $\gamma$是一个任务相关的scale参数。
+
+在本文中，我们使用静态的GloVe向量作为初始词向量，设定双向语言模型的层数$L = 2$，隐层节点数$H_{dim} = 1024$，输出维度$output_{dim} = 128$。
 
 \section{自注意力（SA）与混合注意力（CA）}
 

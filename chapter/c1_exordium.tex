@@ -35,7 +35,7 @@
 
 视觉问答任务要求系统能同时正确理解问题文本内容和图像内容，一般而言视觉问答系统分为三个主要模块，a)从问题文本中提取特征，使得特征中包含足够多的语义信息。b)从图像中提取特征，理解图像中的物体信息、场景信息、活动信息、空间构成信息、颜色信息，将像素信息转化为系统可计算的数值量或者标签。 c)采用某种方式整合文本特征和图像特征，为系统建立一条高泛化能力、高稳健性、高准确率的答案生成通路。简而言之，视觉问答系统会图形和问题文本中分别提取特征，再将两者融合，最终以置信度高的候选答案作为输出（如图\ref{answer-generation}）。
 
-从视觉问答的处理过程可以看出，算法的核心有三个部分组成：如何提取出高层次的图像特征，例如，物体、属性、场景等；如何挖掘问题文本中的语义信息，以求能深入的理解问题内容，确定答案的形式和内容；如何结合图像特征和文本特征，得出正确或是最佳答案。受神经网络在计算机视觉和自然语言处理成功应用的影响，从2014至今的视觉问答研究多采用了神经网络模型，使用卷积神经网络CNN提取图像特征，使用卷积神经网络RNN或者长短期记忆LSTM处理文本信息，再通过不同的方式“融合”图像特征和文本特征得出答案。图像特征提取的方法一般使用预处理后的卷积神经网络，例如VGGNet\citing{simonyan2014very}、 ResNet\citing{he2016deep}和GoogLeNet\citing{Szegedy_2015_CVPR}。问题文本的特征提取则借鉴了自然语言处理中的成果，例如词袋模型（BOW）\citing{zhou2015simple}、长短期记忆（LSTM）\citing{malinowski2015ask}、门控复发单位（GRU）\citing{noh2016image,kumar2016ask,xiong2016dynamic}。系统输出答案的方式有两种(如图\ref{answer-generation})，最常见的方式是将任务视为分类问题，根据候选项的概率大小，确定答案。第二种方式则直接由系统遣词造句合成答案语句，此类方法多出现在有额外知识库的视觉问答系统中，例如Attributes-LSTM\citing{wu2016value}、ACK\citing{wu2016ask}、Ahab\citing{wang2015explicit}、Facts-VQA\citing{wang2017fvqa}、Multimodal KB\citing{zhu2015building}。
+从视觉问答的处理过程可以看出，算法的核心有三个部分组成：如何提取出高层次的图像特征，例如，物体、属性、场景等；如何挖掘问题文本中的语义信息，以求能深入的理解问题内容，确定答案的形式和内容；如何结合图像特征和文本特征，得出正确或是最佳答案。受神经网络在计算机视觉和自然语言处理成功应用的影响，从2014至今的视觉问答研究多采用了神经网络模型，使用卷积神经网络CNN提取图像特征，使用卷积神经网络RNN或者长短期记忆LSTM处理文本信息，再通过不同的方式“融合”图像特征和文本特征得出答案。图像特征提取的方法一般使用预处理后的卷积神经网络，例如VGGNet\citing{simonyan2014very}、 ResNet\citing{he2016deep}和GoogLeNet\citing{Szegedy_2015_CVPR}。问题文本的特征提取则借鉴了自然语言处理中的成果，例如词袋模型（CBOW）\citing{zhou2015simple}、长短期记忆（LSTM）\citing{malinowski2015ask}、门控复发单位（GRU）\citing{noh2016image,kumar2016ask,xiong2016dynamic}。系统输出答案的方式有两种(如图\ref{answer-generation})，最常见的方式是将任务视为分类问题，根据候选项的概率大小，确定答案。第二种方式则直接由系统遣词造句合成答案语句，此类方法多出现在有额外知识库的视觉问答系统中，例如Attributes-LSTM\citing{wu2016value}、ACK\citing{wu2016ask}、Ahab\citing{wang2015explicit}、Facts-VQA\citing{wang2017fvqa}、Multimodal KB\citing{zhu2015building}。
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth]{answer-generation.png}
@@ -194,7 +194,7 @@ Ahab类似于专家系统，针对特定的问题设定了与之对应的知识�
 	\label{question_processing}
 \end{figure}
 
-在评估Ahab对于需要先验知识的问题的表现时，Wang等人使用了自己构建的KB-VQA数据集（上文中有详细介绍）作为测试集，但KB-VQA中的问题多数是开放性的，并且还没有自动化评估正确性的方法被提出，因此使用人工的方式对结果的正确性进行评估，每个结果被人工地赋予5种表示正确程度的分数：1分-完全错误、2分-部分错误、3分-模棱两可、4分-基本正确、5分-完全正确。
+在评估Ahab对于需要先验知识的问题的表现时，Wang等人使用了自己构建的KB-VQA数据集\citing{wang2015explicit}作为测试集，但KB-VQA中的问题多数是开放性的，并且还没有自动化评估正确性的方法被提出，因此使用人工的方式对结果的正确性进行评估，每个结果被人工地赋予5种表示正确程度的分数：1分-完全错误、2分-部分错误、3分-模棱两可、4分-基本正确、5分-完全正确。
 
 作为对比，评估还引入了由人类作答和主流的联合嵌入模型作答两种方式——使用CNN编码图像特征，LSTM编码问题文本和生成答案的模型，三种测试系统在不同问题的正确率和平均得分如图\ref{ahab_evaluation}。
 \begin{figure}[H]
