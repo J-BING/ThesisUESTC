@@ -1,5 +1,13 @@
 
 \chapter{None KB-Specific Network（N-KBSN）}
+联合嵌入模型是目前视觉问答的主流架构，因为模型训练的便捷性，并且研究者可以对不同的图像特征的提取方法、不同的文本特征的提取方法、两种模态的不同融合方法组合创新，因此从2015年视觉问答任务出现至今，大量的VQA模型都使用了该架构。此外，由于这些模型便于使用统一的数据集作为衡量标准，因此在VQA任务挑战中，绝大多数的模型都是基于该种架构，也取得了较好的表现，2019年的冠军模型能在VQA2.0数据集下获得总体75\%作用的准确率。
+
+为了实现一个通用的VQA架构，并且利用好联合嵌入模型在回答相对简单的识别类问题的便捷性，本章将沿袭联合嵌入模型的思路，提出None KB-Specific Network（N-KBSN）模型。N-KBSN使用在多目标检测中表现优秀的Faster R-CNN\citing{ren2015faster}作为图像特征提取器，使用能够获得上下文信息的ELMo动态词向量\citing{Peters:2018}表示问题文本，并使用从Transformer中借鉴的多头注意力机制\citing{NIPS2017_7181}进一步强化特征的表征能力，最后通过特征融合预测答案。N-KBSN模型的基础架构如图\ref{N-KBSN}。
+\begin{figure}[H]
+	\includegraphics[width=0.8\textwidth]{N-KBSN.png}
+	\caption{N-KBSN基本结构}
+	\label{N-KBSN}
+\end{figure}
 
 \section{基于Faster R-CNN的图像处理}
 目标检测是机器视觉领域的重要应用之一，目标检测的核心任务是准确、快速的从图像中定位出目标并且能识别目标的类别、属性等特性。在 2012 年深度学习正式介入计算机视觉目标检测任务之前，传统的目标检测算法一直是以滑动窗口卷积等较为传统的方式进行区域选择、特征提取和分类回归等步骤，例如可变形的组件模型（DPM）方法\citing{felzenszwalb2009object}等。这些传统的目标检测算法大多区域选择的策略效果差、时间复杂度高，并且因为由于是人工提取特征，提取的特征层次较低，致使模型的鲁棒性较差。在深度学习兴起并逐渐成为计算机视觉的核心方法之后，大批优秀的目标检测算法出现，例如R-CNN\citing{girshick2014rich}、SPP-Net\citing{he2015spatial}、Fast R-CNN\citing{girshick2015fast}、Faster R-CNN\citing{ren2015faster}、Mask R-CNN\citing{he2017mask}、YOLO\citing{redmon2016you}及其后续版本等。以上的模型大致分为两个主要类别，第一类为两级式检测框架，包含一个用于区域提议的预处理步骤，使得整体流程是两级式的，例如一系列的R-CNN模型；第二类为单级式检测框架，即无区域提议的框架，这是一种单独提出的方法，不会将检测提议分开，使得整个流程是单级式的，例如YOLO系列的模型。由于Faster R-CNN在各个目标识别任务的出色表现，本节将省略对单级式检测框架的介绍，并着重介绍本文中图像处理的核心模型Faster R-CNN。
@@ -8,7 +16,7 @@
 
 Faster R-CNN同样沿袭了先前R-CNN和Fast R-CNN的两级式检测框架，但是为了解决之前的大量候选框导致的速度慢的问题，Faster R-CNN设计了一个用于选择和判断候选区域候选网络（Region Proposal Network, RPN），该网络将CNN处理后的全局图像特征作为输入，输出候选区域，最终的分类器结合全局的图像特征和候选区域预测各个区域的类别。
 \begin{figure}[H]
-	\includegraphics[width=0.8\textwidth]{Faster_R_CNN.png}
+	\includegraphics[width=0.5\textwidth]{Faster_R_CNN.png}
 	\caption{Faster R-CNN基本结构}
 	\label{Faster_R_CNN}
 \end{figure}
@@ -30,7 +38,8 @@ ELMo是一种深度场景化的词表示。其模型深度能够对复杂的词�
 \begin{equation}
 p(t_1, t_2, ..., t_N)=\prod_{k=1}^N p(t_k|t_1,t_2,...,t_{k-1})
 \end{equation}
-其中$p(t_1, t_2, ..., t_N)$为序列的联合概率，$p(t_k|t_1, t_2,..., t_{k-1})$表示已知$t_k$的上文$(t_1, t_2, ..., t_{k-1})$的条件下，求解$t_k$的条件概率。对应的后向语言模型的公式为
+其中$p(t_1, t_2, ..., t_N)$为序列的联合概率，
+$p(t_k|t_1, t_2,..., t_{k-1})$表示已知$t_k$的上文$(t_1, t_2, ..., t_{k-1})$的条件下，求解$t_k$的条件概率。对应的后向语言模型的公式为
 \begin{equation}
 p(t_1, t_2, ..., t_N)=\prod_{k=1}^N p(t_k|t_{k+1},t_{k+2},...,t_N)
 \end{equation}
@@ -59,9 +68,54 @@ ELMo_k^{task} = E(R_k; \Theta^{task}) = \gamma^{task}\sum_{j=0}^L s_j^{task} h_{
 
 其中是$s_j^{task}$任务相关训练得到的权重参数, $\gamma$是一个任务相关的scale参数。
 
-在本文中，我们使用静态的GloVe向量作为初始词向量，设定双向语言模型的层数$L = 2$，隐层节点数$H_{dim} = 1024$，输出维度$output_{dim} = 128$。
+在本文中，我们将问题文本分割为单词组成的列表，并将每个单词转化为50维的初始词向量，即$x_k^{LM}\in \mathbb{R}^{50}$，设定双向语言模型的层数$L = 2$，隐层节点数$H_{dim} = 4096$，输出维度$output_{dim} = 512$，因此$ELMo_k^{task}$维度为1024。
 
-\section{自注意力（SA）与混合注意力（CA）}
+\section{自注意力（SA）与引导注意力（GA）}
+正如绪论中提到的，注意力机制的引入帮助神经网络提高了预测精度，并且减少了计算复杂度。视觉问答任务由于需要处理多模态的数据——图像和文本，比起仅需要处理单模态的数据的任务更需要进行高效的计算。同时，VQA任务输入的图像和问题文本具有高度的相关性，因此两种模态的数据之间的交互对于结果的准确性的提升也具有显著的影响。对于以上两个需求，我们在N-KBSN中使用了Transformer\citing{NIPS2017_7181}的多头注意力机制（Multi-head Attention, MA）实现图片的自注意力（V-SA）、问题文本的自注意力（Q-SA）、由问题引导的对图像的注意力（Guided Attention, GA）。
+
+注意力机制本质上是找到一个方式对已有信息分配合适的权重，并以此提高输出的准确性。我们可以将注意力函数描述成映射查询（query）到一些键值对（key-value pair）并由此得到输出。假定查询矩阵$Q = \{q_1, q_2, ..., q_m\}$，其中查询向量$q_i \in \mathbb{R}^{1 \times d_q}$；key矩阵$K = \{k_1, k_2, ..., k_n\}$，其中$k_j\in \mathbb{R}^{1 \times d_k}$；value矩阵$V = \{v_1, v_2, ..., v_n\}$，其中value向量$v_i \in \mathbb{R}^{1 \times d_v}$，那么注意力特征可以通过对value矩阵的加权得到，权重可以通过查询矩阵和key矩阵得到：
+\begin{equation}
+Attention(Q, K, V) = score(Q, K)V
+\end{equation}
+其中$score(Q, K)$为计算权重的函数，有多种计算方式，本文使用Transformer中的缩放点乘法：
+\begin{equation}
+score(Q, K) = softmax(\frac{QK^T}{\sqrt{d_k}})
+\end{equation}
+其中$q_i$和$k_j$要求具有相同的维度。
+因此可以得到：
+\begin{equation}
+Attention(Q, K, V) = softmax(\frac{QK^T}{\sqrt{d_k}})V
+\end{equation}
+
+为了进一步提高注意力特征的表达能力，引入多头注意力机制。多头注意力机制的实现过程是，将上式的$Q, K, V$输入到$h$个具有不同权重的线性层，得到$(Q_i, K_i, V_i), i = 1, 2, ..., h$，再分别计算得到$Attention(Q_i, K_i, V_i), i = 1, 2, ..., h$，最后将$h$个注意力特征拼接并通过一个线性层获得期望维度的注意力特征，如图\ref{ma}。多头注意力机制的公式为：
+\begin{equation}
+MA(Q, K, V) = [head_1, head_2, ..., head_h]W
+\end{equation}
+\begin{equation}
+head_i = Attention(Q_i, K_i, V_i)
+\end{equation}
+其中$W$为线性层的权重。
+\begin{figure}[H]
+	\includegraphics[width=0.5\textwidth]{ma.png}
+	\caption{多头注意力的架构。多头注意力特征由h个缩放点乘注意力特征拼接得到。}
+	\label{ma}
+\end{figure}
+
+基于以上多头注意力机制的思想，本文分别使用三种注意力特征：图片的自注意力（V-SA）、问题文本的自注意力（Q-SA）、由问题引导的对图像的注意力（GA）。假设文本词向量矩阵为$Y$，图像特征图为$X$，则在计算V-SA时，$Q = K = V = X$，在计算Q-SA时，$Q = K = V = Y$；在计算引导注意力特征时，$Q = Y$为词向量矩阵，$K = V = X$为图像特征矩阵，并且词向量和图像特征向量具有相同的维度。三种注意力组合的结构构成一个共同注意力模块（MCA），结构如图\ref{mca}。
+\begin{figure}[H]
+	\includegraphics[width=0.3\textwidth]{mca.png}
+	\caption{共同注意力模块（MCA）由一个V-SA、一个Q-SA和一个GA组成。}
+	\label{mca}
+\end{figure}
+
+为了提高使用深度的注意力机制提取更高层次的特征，MCAN论文\citing{Yu_2019_CVPR}提出了Encoder-Decoder和Stacking两种级联MCA层的方式，如图\ref{mca_stacking}。
+\begin{figure}[H]
+	\includegraphics[width=0.5\textwidth]{mca_stacking.png}
+	\caption{两种MCA层的级联方式，Stacking将上一层的输出直接作为下一层的输入，Encoder-Decoder将最后一层的问题自注意力特征作为每一层图像的查询矩阵。}
+	\label{mca_stacking}
+\end{figure}
+
+根据文章给出的两种级联方式在多个任务的表现情况\citing{Yu_2019_CVPR}，在本文中，我们使用Stacking的级联方式，并将设置不同的层数$L$，探究不同深度下注意力机制对模型的影响。
 
 \section{实验}
 \subsection{超参数配置}
