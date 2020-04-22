@@ -1,4 +1,4 @@
-\chapter{KB-Specific Network（KBSN）}
+\chapter{基于知识库图嵌入的视觉问答模型}
 \section{知识库概述}
 人类智能体通过学习和实践不断获取知识与经验，并能将习得的知识存储在记忆系统中，面对相关问题时能准确、快速地调用相关的知识和经验，完成识别和推理过程，成功解决问题。人工智能系统的终极目标便是能像人类一般快速、准确地解决未知问题，甚至超越人类的物理极限，实现范围更广、更艰深的任务解决。人类在真实世界中的学习是不断将非结构化的信息重构为结构化的知识的过程，知识库（KB）是一种包含常识和描述真实世界的事实的知识集，在不同的应用情景中有不同的内部结构。
 
@@ -151,15 +151,11 @@ Wikidata于2012年提出，相较起以往的知识库，开放性更强，限�
 \toprule
 \textbf{DBpedia数据集} & \textbf{描述}\\
 \midrule
-article\_categories\_en & 连接实体和所属类别 \\
-category\_labels\_en &  类别标签 \\
-disambiguations\_en &  区分歧义的子图 \\
 instance\_types\_en & 连接实体及其类型 \\
 labels\_en & 实体标签 \\
 mappingbased\_literals\_en & 连接object为literal的高质量的谓语 \\
 mappingbased\_objects\_en & 连接object为对象的高质量的谓语 \\
 persondata\_en & 和person相关的信息，例如出生日期等 \\
-skos\_categories\_en & 类别之间的关联 \\
 \bottomrule
 \end{tabular*}
 \label{dbpeidaList}
@@ -172,12 +168,12 @@ skos\_categories\_en & 类别之间的关联 \\
 \toprule
 \textbf{统计参数} & \textbf{数量}\\
 \midrule
-三元组 &  123,615,723\\
-类 &  751\\
-实体 & 6,852,094 \\
-主语 & 16,031,055 \\
-属性 & 1,382 \\
-宾语 & 23,074,637 \\
+三元组 &  59,998,758\\
+类 &  426\\
+实体 & 5,377,081 \\
+主语 & 14,556,042 \\
+属性 & 1,377 \\
+宾语 & 19,495,719 \\
 \bottomrule
 \end{tabular}
 \label{dbpediaPara}
@@ -311,4 +307,5 @@ X(e_{i,j}) = elmo(e_{i,j})
 \subsection{数据集}
 \subsection{实验结果分析}
 
-\section{结论}
+\section{本章小结}
+
