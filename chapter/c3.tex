@@ -210,7 +210,7 @@ z = LayerNorm(W_x^Tx + W_y^Ty)
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{三种 ELMO 的参数配置。}
+\caption{三种 ELMO 的参数配置}
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Model} & \textbf{Parameters (Millions)} & \textbf{LSTM Size} & \textbf{Output Size} & \textbf{ELMO Size}\\
@@ -227,7 +227,7 @@ $ELMO_l$&  93.6& 4096&  512& 1024\\
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{word2vec, Glove, 三种elmo模型的统计信息。}
+\caption{word2vec, Glove, 三种elmo模型的统计信息}
 \begin{tabular}{c|c|c|c}
 \toprule
 \textbf{名称} & \textbf{预训练语料库（大小）} & \textbf{词向量维度} & \textbf{词向量数量} \\
@@ -251,7 +251,7 @@ $ELMO_l$&  & 1024&  \\
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{使用不同文本特征化的模型在val数据集的结果。结果包括总体正确率以及三种答案类型：是否、计数、其他的单项正确率。}
+\caption{使用不同文本特征化的模型在val数据集的结果}
 \begin{tabular}{c|cccc}
 \toprule
 模型 & 总体正确率 & 是否 & 计数 & 其他\\
@@ -283,7 +283,7 @@ $N-KBSN(l)$&  \textbf{67.72}& \textbf{85.22}&  \textbf{49.63}& \textbf{59.20}\\
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{$N-KBSN(m)$和$baseline(glove)$在不同训练子集的实验结果统计。}
+\caption{$N-KBSN(m)$和$baseline(glove)$在不同训练子集的实验结果统计}
 \begin{tabular}{cccc}
 \toprule
 准确率 & $baseline(glove)$ & $N-KBSN(m)$ & 差值\\
@@ -313,7 +313,7 @@ $N-KBSN(m)$的准确率始终高于$baseline(glove)$，这说明动态词向量�
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{$Res(elmo)$和$Res(glove)$在验证集的答案的差异。}
+\caption{$Res(elmo)$和$Res(glove)$在验证集的答案的差异}
 \begin{tabular}{cc}
 \toprule
 不同答案的问题数（比例） & 52,990 (24.7\%）\\
@@ -339,7 +339,7 @@ $N-KBSN(m)$的准确率始终高于$baseline(glove)$，这说明动态词向量�
 \begin{table}[H]
 % \resizebox{0.8\textwidth}{!}{}
 \centering
-\caption{$N-KBSN(l)$模型和其他模型在测试集上的结果对比。}
+\caption{$N-KBSN(l)$模型和其他模型在测试集上的结果对比}
 \begin{tabular}{c|cccc|c}
 \toprule
 \multirow{2}{*}{模型} & \multicolumn{4}{c}{Test-dev} & Test-std\\
